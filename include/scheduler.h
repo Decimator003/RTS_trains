@@ -23,6 +23,15 @@ public:
     std::string getCurrentTime() const;
     void advanceTime();
 
+	Train* getTrainById(int id) {
+        for(auto& train : trains) {
+            if(train.getId() == id) {
+                return &train;
+            }
+        }
+        return nullptr;
+    }
+
 private:
     // Helper methods
     bool isTimeToProcess(const std::string& scheduled_time) const;
