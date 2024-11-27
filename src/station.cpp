@@ -16,18 +16,23 @@ TrainStation::TrainStation() {
     left_entries = {0, 1, 2, 3};
     right_entries = {4, 5, 6, 7};
 }
-
-bool TrainStation::allocateTrack(int train_id) {
-    // Find first available track
-    for(int i = 0; i < 8; i++) {
-        if(!tracks[i].occupied) {
-            tracks[i].occupied = true;
-            tracks[i].light_status = false;
+/*
+bool TrainStation::allocateTrack(int train_id, const std::string& entry_point) {
+    const std::vector<int>& available_tracks =
+        (entry_point == "WEST") ? left_entries : right_entries;
+   
+    for(int track_id : available_tracks) {
+        if(!tracks[track_id].occupied) {
+            tracks[track_id].occupied = true;
+            tracks[track_id].light_status = false;
+            train_track_map[train_id] = track_id;  // Track which train is on which track
             return true;
         }
     }
     return false;
 }
+*/
+
 
 void TrainStation::updateSwitches() {
     for(auto& sw : switches) {
@@ -37,8 +42,9 @@ void TrainStation::updateSwitches() {
 }
 
 int TrainStation::getTrainTrack(int train_id) const {
-    for(size_t i = 0; i < tracks.size(); i++) {
-        if(tracks[i].occupied) return i;
+    auto it = train_track_map.find(train_id);
+    if(it != train_track_map.end()) {
+        return it->second;
     }
     return -1;
 }
@@ -56,6 +62,14 @@ void TrainStation::releaseTrack(int track_number) {
     if(track_number >= 0 && track_number < 8) {
         tracks[track_number].occupied = false;
         tracks[track_number].light_status = true;
+    }
+
+	// Remove from tracking map
+    for(auto it = train_track_map.begin(); it != train_track_map.end(); ++it) {
+        if(it->second == track_number) {
+            train_track_map.erase(it);
+            break;
+        }
     }
 }
 
@@ -87,6 +101,7 @@ bool TrainStation::allocateTrack(int train_id, const std::string& entry_point) {
         if(!tracks[track_id].occupied) {
             tracks[track_id].occupied = true;
             tracks[track_id].light_status = false;
+			train_track_map[train_id] = track_id;  // Store the train-track mapping
             return true;
         }
     }
