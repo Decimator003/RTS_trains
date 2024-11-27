@@ -16,6 +16,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(ALLEGRO5 REQUIRED
     allegro-5
     allegro_primitives-5
+    allegro_font-5
 )
 
 # Include directories
