@@ -11,9 +11,20 @@ Visualization::Visualization() : display(nullptr) {
         return;
     }
     initializeDisplay();
+
+	 // Initialize font
+    font = al_create_builtin_font();
+    if(!font) {
+        std::cerr << "Failed to create font!" << std::endl;
+        return;
+    }
 }
 
 Visualization::~Visualization() {
+	 if(font) {
+        al_destroy_font(font);
+    }
+
     if(display) {
         al_destroy_display(display);
     }
@@ -75,4 +86,11 @@ void Visualization::clearScreen() {
 
 void Visualization::updateDisplay() {
     al_flip_display();
+}
+
+
+void Visualization::drawTime(const std::string& time) {
+    if(font) {
+        al_draw_text(font, al_map_rgb(0, 0, 0), 10, 10, 0, time.c_str());
+    }
 }
