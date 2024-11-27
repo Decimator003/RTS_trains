@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <array>
+#include <string>
+#include <map>
 
 struct Track {
     int id;
@@ -28,11 +30,19 @@ public:
     bool getSwitchPosition(int sw) const { return switches[sw].position; }
     int getTrainTrack(int train_id) const;
 
+	void releaseTrack(int track_number);
+	
+	void reset();
+
+	bool allocateTrack(int train_id, const std::string& entry_point);
+
 private:
     std::array<Track, 8> tracks;
     std::array<Switch, 4> switches;
     std::vector<int> left_entries;
     std::vector<int> right_entries;
+
+	std::map<int, int> train_track_map;  // Add this to track which train is on which track
 };
 
 #endif
