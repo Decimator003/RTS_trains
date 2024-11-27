@@ -37,11 +37,15 @@ void Controller::update() {
     for(Train* train : ready_trains) {
         // Handle train arrival
         if(!train->hasArrived()) {
-            if(station.allocateTrack(train->getId())) {
-                trainPositions[train->getId()] = 0.0f;
-                train->setArrived(true);
-                std::cout << "Train " << train->getId() << " arrived at "
-                         << current_time << std::endl;
+            if(station.allocateTrack(train->getId(), train->getEntryPoint())) {
+                if(train->getEntryPoint() == "EAST") {
+        			trainPositions[train->getId()] = 800.0f;  // Start from east end (1.0 = 100%)
+    			} else {
+        			trainPositions[train->getId()] = 0.0f;  // Start from west end (0.0 = 0%)
+    			}
+    	train->setArrived(true);
+    	std::cout << "Train " << train->getId() << " arrived at "
+              << current_time << std::endl;
             }
         }
         // Handle train departure
@@ -59,18 +63,21 @@ void Controller::update() {
     }
    
 	// Update and draw trains
-     for(auto& [trainId, position] : trainPositions) {
-        // Adjust movement direction based on entry point
-        int trackNum = station.getTrainTrack(trainId);
-        if(trackNum >= 0) {
-            if(trackNum < 4) { // Left tracks (WEST entry)
-                position += 2.0f;
-            } else { // Right tracks (EAST entry)
-                position -= 2.0f;
-            }
-            vis.drawTrain(trackNum, position);
-        }
-    }
+    	for(auto& [trainId, position] : trainPositions) {
+   			int trackNum = station.getTrainTrack(trainId);
+    		if(trackNum >= 0) {
+        		Train* train = scheduler.getTrainById(trainId);
+        		if(train) {
+            	// Move based on entry point
+            	if(train->getEntryPoint() == "WEST") {
+                	position += 2.0f;
+            	} else { // EAST entry
+                	position -= 2.0f;
+            	}
+            	vis.drawTrain(trackNum, position);
+        		}
+    		}
+		}
 
 	 // Process next train
     Train* next_train = scheduler.getNextTrain();
