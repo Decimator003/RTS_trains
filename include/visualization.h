@@ -3,7 +3,10 @@
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include <cmath>
+#include <string>
 
 class Visualization {
 public:
@@ -18,8 +21,11 @@ public:
     void updateDisplay();
     void clearScreen();
 
+	void drawTime(const std::string& time);
+
 private:
     ALLEGRO_DISPLAY* display;
+	ALLEGRO_FONT* font;  // Add font member
     const int SCREEN_WIDTH = 800;
     const int SCREEN_HEIGHT = 600;
     const int TRACK_SPACING = 60;
