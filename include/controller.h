@@ -16,7 +16,7 @@ public:
     void update();
     void run();
     void reset();
-
+     
 private:
     // Helper method for time management
     void updateTime();
@@ -25,7 +25,8 @@ private:
     TrainStation& station;
     Scheduler& scheduler;
     Visualization vis;
-   
+   int convertTimeToMinutes(const std::string& time);
+
     // State tracking
     std::map<int, float> trainPositions;  // Maps train IDs to their positions
     std::string current_time;             // Current simulation time in "HH:MM" format
