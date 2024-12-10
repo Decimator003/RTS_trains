@@ -18,6 +18,9 @@ int convertTimeToMinutes(const std::string& time) {
 bool Scheduler::isTimeToProcess(const std::string& scheduled_time) const {
     return convertTimeToMinutes(current_time) >= convertTimeToMinutes(scheduled_time);
 }
+static bool compareByDeadline(Train* a, Train* b) {
+        return a->getDepartureTime() < b->getDepartureTime();
+    }
 
 bool Scheduler::loadSchedule(const std::string& filename) {
     std::ifstream file(filename);
@@ -50,17 +53,20 @@ bool Scheduler::loadSchedule(const std::string& filename) {
             );
         }
     }
-
-    // Sort trains by arrival time and priority
+        // Sort trains by new arrival times and priority
     std::sort(trains.begin(), trains.end(),
         [](const Train& a, const Train& b) {
             if (a.getArrivalTime() == b.getArrivalTime()) {
-                return a.getPriority() < b.getPriority(); // Lower number = higher priority
+                return a.getPriority() < b.getPriority();
             }
             return a.getArrivalTime() < b.getArrivalTime();
         });
+
+    
    
+
     return true;
+
 }
 
 void Scheduler::setCurrentTime(const std::string& time) {
@@ -71,7 +77,81 @@ std::string Scheduler::getCurrentTime() const {
     return current_time;
 }
 
+
 std::vector<Train*> Scheduler::getReadyTrains() {
+    std::vector<Train*> ready_trains;
+    
+    // Get all trains that have arrived but not departed
+    for(auto& train : trains) {
+        if(train.getArrivalTime() <= current_time && !train.hasDeparted()) {
+            ready_trains.push_back(&train);
+        }
+    }
+    
+    // Sort trains by earliest deadline (departure time) - EDF scheduling
+    std::sort(ready_trains.begin(), ready_trains.end(), compareByDeadline);
+    
+    return ready_trains;
+}
+
+
+bool Scheduler::hasConflict(const std::string& start_time, const std::string& end_time, const Train& train) {
+    int start_minutes = convertTimeToMinutes(start_time);
+    int end_minutes = convertTimeToMinutes(end_time);
+    int train_start = convertTimeToMinutes(train.getArrivalTime());
+    int train_end = convertTimeToMinutes(train.getDepartureTime());
+   
+    return !(end_minutes <= train_start || start_minutes >= train_end);
+}
+
+bool Scheduler::isTimeSlotAvailable(const std::string& start_time, const std::string& end_time) {
+    for (const auto& train : trains) {
+        if (hasConflict(start_time, end_time, train)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+
+std::string Scheduler::findNextAvailableSlot(const std::string& after_time) {
+    int current_minutes = convertTimeToMinutes(after_time);
+
+    while (current_minutes < 24 * 60) {  // Within 24 hours
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(2) << (current_minutes / 60) << ":"
+           << std::setfill('0') << std::setw(2) << (current_minutes % 60);
+
+        if (isTimeSlotAvailable(ss.str(),
+            // Add 15 minutes for standard slot size
+            std::to_string((current_minutes + 15) / 60) + ":" +
+            std::to_string((current_minutes + 15) % 60))) {
+            return ss.str();
+        }
+
+        current_minutes += 5;  // Try next 5-minute slot
+    }
+    return "";  // No available slot found
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*std::vector<Train*> Scheduler::getReadyTrains() {
     std::vector<Train*> ready_trains;
    
     for (auto& train : trains) {
@@ -93,6 +173,18 @@ std::vector<Train*> Scheduler::getReadyTrains() {
    
     return ready_trains;
 }
+*/
+
+
+
+
+
+
+
+
+
+
+
 
 Train* Scheduler::getNextTrain() {
     while (current_index < trains.size()) {
