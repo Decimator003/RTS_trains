@@ -13,6 +13,12 @@ public:
     void reset();
     bool isScheduleComplete() const;
 
+    bool isTimeSlotAvailable(const std::string& start_time, const std::string& end_time);
+    std::string findNextAvailableSlot(const std::string& after_time);
+
+
+
+
     // Train management
     Train* getNextTrain();
     std::vector<Train*> getReadyTrains();
@@ -35,6 +41,13 @@ public:
 private:
     // Helper methods
     bool isTimeToProcess(const std::string& scheduled_time) const;
+
+
+
+ bool hasConflict(const std::string& start_time, const std::string& end_time, const Train& train);
+
+
+
 
     // Member variables
     std::vector<Train> trains;
